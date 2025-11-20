@@ -1,6 +1,8 @@
 // SWE_project_website/server/index.ts
 // MUST BE THE FIRST LINES — BEFORE ANY OTHER IMPORT
 console.log("RUNNING BUILD VERSION:", new Date().toISOString());
+console.log("HELLO_TEST:", process.env.HELLO_TEST);
+
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -73,4 +75,5 @@ app.use("/api/auth", authRouter);
     console.log(`🚀 Server running on port ${port}`);
   });
 })();
+
 
