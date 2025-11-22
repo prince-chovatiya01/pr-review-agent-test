@@ -159,7 +159,7 @@ const RAILWAY_URL = "https://pr-review-agent-test-production-5d0a.up.railway.app
 // 🔥 MUST MATCH Express prefix: /api/auth
 const REDIRECT_URI = `${RAILWAY_URL}/api/auth/github/callback`;
 
-const FRONTEND_URL = "http://localhost:3000";
+const FRONTEND_URL = "https://pull-panda-a3s8.vercel.app";
 
 console.log("AUTH CONFIG:");
 console.log("CLIENT ID:", GITHUB_CLIENT_ID);
