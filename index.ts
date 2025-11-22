@@ -18,11 +18,13 @@ const app = express();
 const FRONTEND_URL =
   process.env.FRONTEND_URL || "https://pull-panda-a3s8.vercel.app";
 
+console.log("ALLOWED ORIGIN:", FRONTEND_URL);
+
 /* ---------------------- CORS ----------------------- */
 app.use(
   cors({
-    origin: FRONTEND_URL,   // Allow Vercel domain
-    credentials: true,      // Allow cookies
+    origin: FRONTEND_URL,
+    credentials: true,
   })
 );
 
@@ -34,12 +36,18 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,       // ❗ Needed for HTTPS on Railway
-      sameSite: "none",   // ❗ Required for cross-site cookies
+      secure: true,         // 🔥 REQUIRED for HTTPS on Railway
+      sameSite: "none",     // 🔥 REQUIRED for cross-site cookies
       path: "/",
     },
   })
 );
+
+console.log("COOKIE SETTINGS:", {
+  secure: true,
+  sameSite: "none",
+  path: "/",
+});
 
 /* --------------------- BODY PARSING ---------------------- */
 app.use(express.json());
@@ -60,7 +68,7 @@ app.use("/api/auth", authRouter);
     res.json({ status: "Backend running", env: "production" });
   });
 
-  const port = parseInt(process.env.PORT || "5000", 10);
+  const port = parseInt(process.env.PORT || "8080", 10);
   app.listen(port, "0.0.0.0", () => {
     console.log(`🚀 Server running on port ${port}`);
   });

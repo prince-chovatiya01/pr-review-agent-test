@@ -133,6 +133,7 @@
 // export default router;
 
 
+// SWE_project_website/server/auth.ts
 import express, { Request, Response } from "express";
 import axios from "axios";
 import { Octokit } from "@octokit/rest";
@@ -146,41 +147,16 @@ declare module "express-session" {
 
 const router = express.Router();
 
-/* -----------------------------------------------------
-   🔥 HARDCODED CONSTANTS — MATCH YOUR SERVER ROUTES
------------------------------------------------------- */
-const GITHUB_CLIENT_ID = "Ov23liYe2zHfm9WetpmF";
-const GITHUB_CLIENT_SECRET = "21785f7e36afaa2762ffd15c2609dfc7774a5fb0";
+const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID!;
+const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET!;
+const FRONTEND_URL = process.env.FRONTEND_URL!;
+const BACKEND_URL = process.env.BACKEND_URL!;
 
-const SESSION_SECRET = "supersecret";
-
-const RAILWAY_URL = "https://pr-review-agent-test-production-5d0a.up.railway.app";
-
-// 🔥 MUST MATCH Express prefix: /api/auth
-const REDIRECT_URI = `${RAILWAY_URL}/api/auth/github/callback`;
-
-const FRONTEND_URL = "https://pull-panda-a3s8.vercel.app";
+const REDIRECT_URI = `${BACKEND_URL}/api/auth/github/callback`;
 
 console.log("AUTH CONFIG:");
 console.log("CLIENT ID:", GITHUB_CLIENT_ID);
 console.log("REDIRECT URI:", REDIRECT_URI);
-
-/* -----------------------------------------------------
-   EXPRESS SESSION (HARDCODED SECRET)
------------------------------------------------------- */
-router.use(
-  session({
-    secret: SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      path: "/",
-    },
-  })
-);
 
 /* ------------------------------------------------------
    STEP 1 — LOGIN ROUTE
@@ -190,9 +166,7 @@ router.get("/github", (_req: Request, res: Response) => {
     `https://github.com/login/oauth/authorize` +
     `?client_id=${GITHUB_CLIENT_ID}` +
     `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
-    `&scope=repo,user` +
-    `&prompt=consent` +
-    `&force_verify=true`;
+    `&scope=repo,user`;
 
   res.redirect(authUrl);
 });
@@ -226,8 +200,16 @@ router.get("/github/callback", async (req: Request, res: Response) => {
 
     req.session.accessToken = accessToken;
 
-    console.log("✔ OAuth SUCCESS — redirecting to:", FRONTEND_URL);
-    return res.redirect(FRONTEND_URL);
+    // 🔥 CRITICAL FIX — ensure session is saved BEFORE redirect
+    req.session.save((err) => {
+      if (err) {
+        console.error("SESSION SAVE FAILED:", err);
+        return res.status(500).send("Session save failed.");
+      }
+
+      console.log("✔ SESSION SAVED — redirecting to:", FRONTEND_URL);
+      return res.redirect(FRONTEND_URL);
+    });
   } catch (err) {
     console.error("❌ OAuth callback failed:", err);
     return res.status(500).send("OAuth failed.");
@@ -235,7 +217,7 @@ router.get("/github/callback", async (req: Request, res: Response) => {
 });
 
 /* ------------------------------------------------------
-   STEP 3 — CHECK AUTH STATE
+   STEP 3 — CHECK SESSION
 -------------------------------------------------------- */
 router.get("/me", async (req: Request, res: Response) => {
   if (!req.session.accessToken) {
@@ -250,20 +232,6 @@ router.get("/me", async (req: Request, res: Response) => {
     delete req.session.accessToken;
     return res.status(401).json({ error: "Token invalid, log in again." });
   }
-});
-
-/* ------------------------------------------------------
-   STEP 4 — LOGOUT
--------------------------------------------------------- */
-router.post("/logout", (req: Request, res: Response) => {
-  req.session.destroy(() => {
-    res.clearCookie("connect.sid", {
-      path: "/",
-      sameSite: "lax",
-      secure: false,
-    });
-    return res.json({ message: "Logged out" });
-  });
 });
 
 export default router;
