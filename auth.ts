@@ -149,8 +149,8 @@ const router = express.Router();
 /* -----------------------------------------------------
    🔥 HARDCODED CONSTANTS — MATCH YOUR SERVER ROUTES
 ------------------------------------------------------ */
-const GITHUB_CLIENT_ID = "Ov23liVEZWJtiA8Tsd7Z";
-const GITHUB_CLIENT_SECRET = "1e8141bec9497d83b1f8e2de88712b9d9cd69177";
+const GITHUB_CLIENT_ID = "Ov23liYe2zHfm9WetpmF";
+const GITHUB_CLIENT_SECRET = "21785f7e36afaa2762ffd15c2609dfc7774a5fb0";
 
 const SESSION_SECRET = "supersecret";
 
